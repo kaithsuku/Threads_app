@@ -1,88 +1,87 @@
 "use client";
 
-import * as z from "zod";
+import { z } from "zod";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
-import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
-import { Input } from "../ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { usePathname, useRouter } from "next/navigation";
 
-// import { updateUser } from "@/lib/actions/user.actions";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+
 import { CommentValidation } from "@/lib/validations/thread";
-import Image from "next/image";
 import { addCommentToThread } from "@/lib/actions/threads.actions";
-// import { createThread } from "@/lib/actions/threads.actions";
+
 interface Props {
-    threadId: string;
-    currentUserImg: string;
-    currentUserId: string;
+  threadId: string;
+  currentUserImg: string;
+  currentUserId: string;
 }
 
-const Comment = ({threadId, currentUserImg, currentUserId}: Props) => {
-    const router = useRouter();
-    const pathname = usePathname();
-  
-    const form = useForm({
-      resolver: zodResolver(CommentValidation),
-      defaultValues: {
-        thread : '',
-        
-      },
-    });
+function Comment({ threadId, currentUserImg, currentUserId }: Props) {
+  const pathname = usePathname();
 
-    const onSubmit = async (values: z.infer<typeof CommentValidation>) => {
-        await addCommentToThread(threadId, values.thread, JSON.parse(currentUserId), pathname);
+  const form = useForm<z.infer<typeof CommentValidation>>({
+    resolver: zodResolver(CommentValidation),
+    defaultValues: {
+      thread: "",
+    },
+  });
 
-        form.reset();
-    }
-  
-     return(
-        
-        <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="comment-form"
-      >
+  const onSubmit = async (values: z.infer<typeof CommentValidation>) => {
+    await addCommentToThread(
+      threadId,
+      values.thread,
+      JSON.parse(currentUserId),
+      pathname
+    );
+
+    form.reset();
+  };
+
+  return (
+    <Form {...form}>
+      <form className='comment-form' onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
-          name="thread"
+          name='thread'
           render={({ field }) => (
-            <FormItem className="flex items-center gap-3 w-full">
-              <FormLabel >
+            <FormItem className='flex w-full items-center gap-3'>
+              <FormLabel>
                 <Image
-                src={currentUserImg}
-                alt="Profile photo"
-                width={48}
-                height={48}
-                className="rounded-full object-cover" />
+                  src={currentUserImg}
+                  alt='current_user'
+                  width={48}
+                  height={48}
+                  className='rounded-full object-cover'
+                />
               </FormLabel>
-              <FormControl className="border-none bg-transparent" > 
+              <FormControl className='border-none bg-transparent'>
                 <Input
-                  type="text"
-                  placeholder="Comment.."
-                  className="no-focus text-light-1 outline-none"
+                  type='text'
                   {...field}
+                  placeholder='Comment...'
+                  className='no-focus text-light-1 outline-none'
                 />
               </FormControl>
-        
             </FormItem>
           )}
         />
 
-        <Button type="submit" className="comment-form_btn">Reply</Button>
+        <Button type='submit' className='comment-form_btn'>
+          Reply
+        </Button>
       </form>
-      </Form>
-    )
-
+    </Form>
+  );
 }
 
-export default Comment
+export default Comment;
